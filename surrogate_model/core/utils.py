@@ -1,6 +1,6 @@
 import torch
 
-def compute_and_store_normalization(data):
+def normalization(data):
     """
     Computes the mean and standard deviation of the input data and stores them.
     
