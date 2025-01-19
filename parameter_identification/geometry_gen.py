@@ -70,7 +70,7 @@ gmsh.model.mesh.generate(2)
 gmsh.option.setNumber("General.Terminal", 0)
 
 # Save to file
-gmsh.write("tensile_test_specimen2.msh")
+gmsh.write("tensile_test_specimen2l.msh")
 
 # Finalize Gmsh
 gmsh.finalize()

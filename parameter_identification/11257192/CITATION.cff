@@ -1,0 +1,52 @@
+# This CITATION.cff file was generated with cffinit.
+
+cff-version: 1.2.0
+title: >-
+  Digital image correlation measurement of linear elastic
+  steel specimen
+message: >-
+  If you use this dataset, please cite it using the metadata
+  from this file.
+type: dataset
+authors:
+  - given-names: Jendrik-Alexander
+    family-names: Tröger
+    email: jendrik-alexander.troeger@tu-clausthal.de
+    affiliation: Clausthal University of Technology
+    orcid: 'https://orcid.org/0000-0002-4999-4558'
+  - given-names: Stefan
+    family-names: Hartmann
+    email: stefan.hartmann@tu-clausthal.de
+    affiliation: Clausthal University of Technology
+    orcid: 'https://orcid.org/0000-0003-1849-0784'
+  - given-names: David
+    family-names: Anton
+    email: d.anton@tu-braunschweig.de
+    affiliation: Technische Universität Braunschweig
+    orcid: 'https://orcid.org/0000-0002-0888-0220'
+  - given-names: Henning
+    family-names: Wessels
+    email: h.wessels@tu-braunschweig.de
+    affiliation: Technische Universität Braunschweig
+    orcid: 'https://orcid.org/0000-0002-2542-1130'
+abstract: >-
+  The dataset comprises the axial and lateral displacements
+  on the surface of a plate with a hole subjected to tensile
+  load. The displacement data are measured by digital image
+  correlation and the material is assumed to behave linear
+  elastic. The material under investigation is a common
+  low-carbon steel alloy of type S235. The displacement data
+  are used for calibration of a linear elastic constitutive
+  model using parametric physics-informed neural networks
+  and finite elements. For that purpose, the dataset
+  comprises both the raw experimental displacement data and
+  displacement data interpolated onto a regular grid using
+  linear interpolation.
+keywords:
+  - digital image correlation
+  - experimental data
+  - linear elasticity
+  - constitutive model calibration
+license: Creative Commons Attribution 4.0 International
+version: '1.0'
+date-released: '2024-05-23'

@@ -1,6 +1,6 @@
 import torch
 
-def normalization(data):
+def normalize(data, return_mean_std=False):
     """
     Computes the mean and standard deviation of the input data and stores them.
     
@@ -13,7 +13,8 @@ def normalization(data):
     """
     mean = data.mean(dim=0)
     std = data.std(dim=0)
-    
+    if return_mean_std :
+        return (data - mean) / std, mean , std
     # Return normalized data
     return (data - mean) / std
 
