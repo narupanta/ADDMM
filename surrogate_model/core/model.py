@@ -78,4 +78,4 @@ class CVGAEWithDeformationDecoder(torch.nn.Module):
         loss = F.mse_loss(output, self._output_normalizer(data.gt_displacement, None, True))
         loss += -0.5 * torch.sum(1 + self.logvar - self.mu.pow(2) - self.logvar.exp()) * beta
         return loss
-            
+

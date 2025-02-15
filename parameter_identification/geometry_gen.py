@@ -17,24 +17,21 @@ t = 4    # Thickness
 hole_center = (L_roundx + L_t + L_specimen/2, 0)
 hole_radius = 4e-3  # Hole radius (4 mm diameter)
 transition_radius = 25e-3  # Transition radius
-
+lc = 1e-3
 # Define points
-p1 = gmsh.model.geo.addPoint(0, 0, 0)
-p2 = gmsh.model.geo.addPoint(0, -W_fix/2, 0)
-p3 = gmsh.model.geo.addPoint(L_roundx, -W_specimen/2, 0)
-p4 = gmsh.model.geo.addPoint(L_roundx + L_t,  -W_specimen/2, 0)
-p5 = gmsh.model.geo.addPoint(L_roundx + L_t + L_specimen,  -W_specimen/2, 0)
-p6 = gmsh.model.geo.addPoint(L_roundx + L_t + L_specimen,  W_specimen/2, 0)
-p7 = gmsh.model.geo.addPoint(L_roundx + L_t,  W_specimen/2, 0)
-p8 = gmsh.model.geo.addPoint(L_roundx,  W_specimen/2, 0)
-p9 = gmsh.model.geo.addPoint(0, W_fix/2, 0)
-p10 = gmsh.model.geo.addPoint(hole_center[0], hole_center[1], 0)
+p1 = gmsh.model.geo.addPoint(0, 0, 0, lc/5)
+p2 = gmsh.model.geo.addPoint(0, -W_fix/2, 0, lc/5)
+p3 = gmsh.model.geo.addPoint(L_roundx, -W_specimen/2, 0, lc)
+p4 = gmsh.model.geo.addPoint(L_roundx + L_t,  -W_specimen/2, 0, lc)
+p5 = gmsh.model.geo.addPoint(L_roundx + L_t + L_specimen,  -W_specimen/2, 0, lc/5)
+p6 = gmsh.model.geo.addPoint(L_roundx + L_t + L_specimen,  W_specimen/2, 0, lc/5)
+p7 = gmsh.model.geo.addPoint(L_roundx + L_t,  W_specimen/2, 0, lc)
+p8 = gmsh.model.geo.addPoint(L_roundx,  W_specimen/2, 0, lc)
+p9 = gmsh.model.geo.addPoint(0, W_fix/2, 0, lc/5)
+p10 = gmsh.model.geo.addPoint(hole_center[0], hole_center[1], 0, lc)
 
-cp1 = gmsh.model.geo.addPoint(L_roundx, -(transition_radius * 4/5 + W_fix/2), 0)
-cp2 = gmsh.model.geo.addPoint(L_roundx, transition_radius * 4/5 + W_fix/2, 0)
-cp3 = gmsh.model.geo.addPoint(L_roundx + L_t + L_specimen, -(transition_radius * 4/5 + W_fix/2), 0)
-cp3 = gmsh.model.geo.addPoint(L_roundx + L_t + L_specimen, (transition_radius * 4/5 + W_fix/2), 0)
-
+cp1 = gmsh.model.geo.addPoint(L_roundx, -(transition_radius * 4/5 + W_fix/2), 0, lc)
+cp2 = gmsh.model.geo.addPoint(L_roundx, transition_radius * 4/5 + W_fix/2, 0, lc)
 
 # Define lines
 l1 = gmsh.model.geo.addLine(p1, p2)
@@ -48,30 +45,49 @@ l8arc = gmsh.model.geo.addCircleArc(p8, cp2, p9)
 l9 = gmsh.model.geo.addLine(p9, p1)
 
 # Hole definition
-p_hole1 = gmsh.model.geo.addPoint(hole_center[0] + hole_radius, hole_center[1], 0)
-p_hole2 = gmsh.model.geo.addPoint(hole_center[0] - hole_radius, hole_center[1], 0)
-arc1 = gmsh.model.geo.addCircleArc(p_hole1, p10, p_hole2)
-arc2 = gmsh.model.geo.addCircleArc(p_hole2, p10, p_hole1)
+p_hole1 = gmsh.model.geo.addPoint(hole_center[0] + hole_radius, hole_center[1], 0, lc/20)
+p_hole2 = gmsh.model.geo.addPoint(hole_center[0] - hole_radius, hole_center[1], 0, lc/20)
+p_hole3 = gmsh.model.geo.addPoint(hole_center[0], hole_center[1] + hole_radius, 0, lc/20)
+p_hole4 = gmsh.model.geo.addPoint(hole_center[0], hole_center[1] - hole_radius, 0, lc/20)
+arc1 = gmsh.model.geo.addCircleArc(p_hole1, p10, p_hole3)
+arc2 = gmsh.model.geo.addCircleArc(p_hole3, p10, p_hole2)
+arc3 = gmsh.model.geo.addCircleArc(p_hole2, p10, p_hole4)
+arc4 = gmsh.model.geo.addCircleArc(p_hole4, p10, p_hole1)
 
 # Define curve loops and surfaces
 outer_loop = gmsh.model.geo.addCurveLoop([l1, l2arc, l3, l4, l5, l6, l7, l8arc, l9])
-hole_loop = gmsh.model.geo.addCurveLoop([arc1, arc2])
+hole_loop = gmsh.model.geo.addCurveLoop([arc1, arc2, arc3, arc4])
 surface = gmsh.model.geo.addPlaneSurface([outer_loop, hole_loop])
-gmsh.model.addPhysicalGroup(2, [surface], tag=1)
-gmsh.model.addPhysicalGroup(1, [arc1, arc2], tag=2)
-gmsh.model.addPhysicalGroup(1, [l1, l9], tag=3)
-gmsh.model.addPhysicalGroup(1, [l5], tag=4)
+gmsh.model.addPhysicalGroup(2, [surface], tag=-1, name = "surface")
+# gmsh.model.addPhysicalGroup(1, [arc1, arc2], tag=2)
+gmsh.model.addPhysicalGroup(1, [l1, l9], tag=-1, name = "Dirichlet BC")
+gmsh.model.addPhysicalGroup(1, [l5], tag=-1, name = "Neumann BC")
 
 # Synchronize and generate mesh
 gmsh.model.geo.synchronize()
-gmsh.option.setNumber("Mesh.CharacteristicLengthMin", 2.5e-3)  # Minimum element size
-gmsh.option.setNumber("Mesh.CharacteristicLengthMax", 2.5e-3)  # Maximum element size
+
+gmsh.model.mesh.field.add("Distance", 1)
+# gmsh.model.mesh.field.setNumbers(1, "PointsList", [p10])
+gmsh.model.mesh.field.setNumbers(1, "CurvesList", [hole_loop])
+gmsh.model.mesh.field.setNumber(1, "Sampling", 100)
+
+gmsh.model.mesh.field.add("Threshold", 2)
+gmsh.model.mesh.field.setNumber(2, "InField", 1)
+gmsh.model.mesh.field.setNumber(2, "SizeMin", lc / 5)
+gmsh.model.mesh.field.setNumber(2, "SizeMax", lc)
+gmsh.model.mesh.field.setNumber(2, "DistMin", 4e-3)
+gmsh.model.mesh.field.setNumber(2, "DistMax", 8e-3)
+
+gmsh.option.setNumber("Mesh.Algorithm", 5)
+# gmsh.option.setNumber("Mesh.CharacteristicLengthMin", 2.5e-3)  # Minimum element size
+# gmsh.option.setNumber("Mesh.CharacteristicLengthMax", 2.5e-3)  # Maximum element size
 gmsh.model.mesh.generate(2)
 gmsh.option.setNumber("General.Terminal", 0)
 
 # Save to file
-gmsh.write("tensile_test_specimen2l.msh")
-
+gmsh.write("tensile_test_specimen3l.msh")
+if '-nopopup' not in sys.argv:
+    gmsh.fltk.run()
 # Finalize Gmsh
 gmsh.finalize()
 # mesh = meshio.read("tensile_test_specimen2.msh")  # Read the .msh file generated by Gmsh

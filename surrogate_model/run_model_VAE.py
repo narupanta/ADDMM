@@ -1,8 +1,9 @@
 from core.utils import * 
-from core.datasetclass import LinearElasticityDataset
-from core.model_graphnet import EncodeProcessDecode
+from core.datasetclass import LinearElasticityVAEDataset
+from core.model_gcvae import GraphConvolutionCVAE
 from tqdm import tqdm
 from torch_geometric.loader import DataLoader
+import torch.nn.functional as F
 
 if __name__ == "__main__" :
     torch.manual_seed(42) 
@@ -15,20 +16,22 @@ if __name__ == "__main__" :
     logger = logging.getLogger()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    dataset = LinearElasticityDataset(data_dir = "/home/narupanta/ADDMM/surrogate_model/dataset")
+    dataset = LinearElasticityVAEDataset(data_dir = "/home/narupanta/ADDMM/surrogate_model/dataset")
 
     train_dataset, test_dataset = torch.utils.data.random_split(dataset, [0.8, 0.2])
     train_loader = DataLoader(train_dataset, batch_size=1, shuffle = True)
-    model = EncodeProcessDecode(node_feat_size=4,
-                                edge_feat_size= 1,
-                                output_size=2,
-                                latent_size=128,
-                                message_passing_steps=15)
+    num_nodes = dataset[0].x.shape[0]
+    model = GraphConvolutionCVAE(params_size = 2,
+                                 hidden_size = 128,
+                                 latent_dim = 16,
+                                 input_size = num_nodes, skip = True, 
+                                 act = F.elu, conv = 'GMMConv', node_feat_size=2,
+                                 edge_feat_size= 1, output_size=2)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, weight_decay=5e-3)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-5, weight_decay=5e-3)
 
     # Training loop
-    num_epochs = 100
+    num_epochs = 11
     train_loss_per_epochs = []
     model.to(device)
     is_accumulate_normalizer_phase = True
@@ -40,7 +43,7 @@ if __name__ == "__main__" :
             batch = batch.to(device)
             optimizer.zero_grad()
             predictions = model(batch)
-            loss = model.loss_function(predictions, batch.y)
+            loss = model.loss_function(predictions, batch, beta = 0)
 
             # Backpropagation
             if is_accumulate_normalizer_phase is False : # use first epoch to accumulate normalizer
